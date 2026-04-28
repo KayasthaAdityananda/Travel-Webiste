@@ -25,6 +25,13 @@ async function main() {
     await mongoose.connect(MongoURI);
 }
 
+//Logger - MiddleWare
+app.use((req, res, next) =>{
+    req.responseTime = new Date(Date.now()).toString();
+    console.log(req.method, req.path, req.responseTime, req.hostname);
+    next();
+})
+
 app.get('/', (req, res) => {    
     res.send('Hello, World!');
 });

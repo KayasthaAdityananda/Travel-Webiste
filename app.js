@@ -101,6 +101,12 @@ app.get("/listing/:id", async (req, res) =>{
     res.redirect("/listings");
 });
 
+//Error Handler
+app.use((err, req, res ,next) => {
+    console.error(err.stack)
+    res.status(500).send("Invalid")
+})
+
 app.use((req, res) => {
     res.status(404).send("Page not found!");
 });

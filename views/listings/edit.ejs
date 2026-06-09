@@ -4,7 +4,7 @@
         <br></br>
         
         <h3>Edit your lisiting</h3>
-    <form method="POST" action="/listings/<%= listing._id %>?_method=PUT">
+    <form method="POST" action="/listings/<%= listing._id %>?_method=PUT" novalidate class="needs-validation">
     
         <div class="mb-3">
             <label for="title" class="form-label">Title:</label>
@@ -12,13 +12,20 @@
             name="listing[title]" 
             value="<%= listing.title %>" 
             type="text" 
-            class="form-control">
+            class="form-control"
+            required>
+            <div class="valid-feedback">
+                Looks good!
+            </div>
+            <div class="invalid-feedback">
+                Please provide a title for your listing.
+            </div>
         </div>
 
         <div class="mb-3">
             <label for="description" class="form-label">Description:</label> 
             <textarea 
-            name="listing[description]" class="form-control">
+            name="listing[description]" class="form-control" required>
             <%= listing.description %>
         </textarea>
         </div>
@@ -29,7 +36,8 @@
             name="listing[image][url]" 
             value="<%= listing.image.url %>" 
             type="text" 
-            class="form-coontrol">
+            class="form-coontrol"
+            required>
         </div>
 
         <div class="row">
@@ -39,7 +47,8 @@
                 name="listing[price]" 
                 value="<%= listing.price %>" 
                 type="number" 
-                class="form-control">
+                class="form-control"
+                required>
             </div>
 
             <div class="mb-3 col-md-8">
@@ -48,7 +57,8 @@
                 name="listing[country]" 
                 value="<%= listing.country %>" 
                 type="text"
-                class="form-control">
+                class="form-control"
+                required>
             </div>
         </div>
 
@@ -58,7 +68,14 @@
             name="listing[location]" 
             value="<%= listing.location %>" 
             type="text" 
-            class="form-control"> 
+            class="form-control"
+            required> 
+            <div class="valid-feedback">
+                Looks good!
+            </div>
+            <div class="invalid-feedback">
+                Please provide a location for your listing.
+            </div>
         </div>
 
         <button class="btn btn-dark edit-btn mb-3">Edit</button>

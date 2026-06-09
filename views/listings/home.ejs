@@ -1,0 +1,23 @@
+<% layout("/layouts/boilerplate") -%>
+
+<div class="hero">
+    <h1>Find Your Next Adventure</h1>
+    <p>Discover unique stays and experiences around the world.</p>
+
+    <a href="/listings" class="btn btn-dark">
+        Explore Listings
+    </a>
+</div>
+
+<form action="/listings" method="GET">
+    <input
+        type="text"
+        name="search"
+        placeholder="Search destinations..."
+        class="form-control"
+    >
+    
+    <button class="btn btn-dark">
+        Search
+    </button>
+</form>

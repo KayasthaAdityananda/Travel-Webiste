@@ -14,7 +14,7 @@ const listingSchema = new Schema({
     url: {
         type: String,
         default:
-            "https://imgs.search.brave.com/ZXhCXAGR0ZVyzYXyfz4cZDKdRf09f_kytK8vi3VCevE/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly90aHVt/YnMuZHJlYW1zdGlt/ZS5jb20vYi9saWdo/dGhvdXNlLW5hc3Nh/dS1iYWhhbWFzLTE3/MTY5NjM0LmpwZw",
+            "https://imgs.search.brave.com/GV--ugAjGsLkNb5--0WZrkZpMoyimbN27bcm9ebGq-E/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJjYXZlLmNv/bS93cC93cDEwMzk4/NDg4LmpwZw",
         set: (v) =>
             v === ""
                 ? "https://imgs.search.brave.com/ZXhCXAGR0ZVyzYXyfz4cZDKdRf09f_kytK8vi3VCevE/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly90aHVt/YnMuZHJlYW1zdGlt/ZS5jb20vYi9saWdo/dGhvdXNlLW5hc3Nh/dS1iYWhhbWFzLTE3/MTY5NjM0LmpwZw"
@@ -32,7 +32,13 @@ const listingSchema = new Schema({
     country: {
         type: String,
         required: true
+    },
+    reviews: [
+        {
+        type: Schema.Types.ObjectId,
+        ref: 'Review'
     }
+]
 });
 
 const Listing = mongoose.model('Listing', listingSchema);

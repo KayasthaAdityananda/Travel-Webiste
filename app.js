@@ -7,6 +7,7 @@ const methodOverride = require('method-override');
 const ejsMate = require("ejs-mate");
 const WrapAsync = require('./utils/Wrapasync.js');
 const ExpressError = require('./utils/ExpressError.js');
+const listingSchema = require('./Schema.js');
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -37,6 +38,20 @@ app.use((req, res, next) =>{
 app.get('/', (req, res) => {
     res.render("listings/Home.ejs");
 });
+
+// Validation for scheme (middleware) - moved to Mongoose Schema
+
+const validateListing = (req, res, next) => {
+        // Validation of schema (Using Joi) 
+        
+        let { error } = listingSchema.validate(req.body);
+        if(error) {
+            let errorMessage = error.details.map((el) => el.message).join(", ");
+            throw new ExpressError(errorMessage, 400);
+        } else {
+            next();
+        }
+}
 
 // app.get('/testListings', async (req, res) => {
 
@@ -74,14 +89,13 @@ app.get('/listings/:id', WrapAsync(async (req, res) => {
 }));
 
 //Create Route
-app.post("/listings", WrapAsync(async (req, res, next) =>
+app.post("/listings", validateListing, WrapAsync(async (req, res, next) =>
     {
         // Validations - Moved to Mongoose Schema
         // if(!req.body.listing) {
         //     throw new ExpressError("Invalid Listing Data!", 400);
         // }
 
-        // Using Joi 
         const newListing = new Listing(req.body.listing);
 
         // // Validations - Moved to Mongoose Schema
@@ -113,7 +127,7 @@ app.get("/listings/:id/edit", WrapAsync(async(req,res) => {
 }));
 
 //Update Route 
-app.put("/listings/:id", WrapAsync(async (req, res) => {
+app.put("/listings/:id", validateListing, WrapAsync(async (req, res) => {
     let { id } = req.params; 
     await Listing.findByIdAndUpdate(id, {...req.body.listing});
     res.redirect("/listings");
@@ -137,6 +151,8 @@ app.use((err, req, res ,next) => {
     let { message, statusCode = 500} = err;
     console.log("___________ERROR___________")
     res.status(statusCode).render("error.ejs", { message }); // Render the error page with error details
+    // console.log(err.stack); // Log the error stack trace for debugging
+
 });
 
 app.listen(3000, () => {

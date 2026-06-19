@@ -7,8 +7,20 @@ let listingSchema = Niggajoi.object({
         price: Niggajoi.number().required().min(0),
         location: Niggajoi.string().required(),
         country: Niggajoi.string().required(),
-        image: Niggajoi.string().allow("", null)
+        image: Niggajoi.object({
+                url: Niggajoi.string().allow("", null)
+            })
     }).required()
 }); 
 
-module.exports = listingSchema;
+let ReviewSchema = Niggajoi.object({
+    Review: Niggajoi.object({
+        rating: Niggajoi.number().required(),
+        comment: Niggajoi.string().required()
+    }).required()
+})
+
+module.exports = {
+    listingSchema, 
+    ReviewSchema
+};

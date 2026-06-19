@@ -1,0 +1,770 @@
+# EXPRESS + MONGODB NOTES (CLEAN VERSION)
+
+==================================================
+**1. EXPRESS APPLICATION**
+==========================
+
+const express = require("express");
+const app = express();
+
+Purpose:
+
+> Create an Express server.
+
+Think:
+
+Express Library
+↓
+Creates
+↓
+Express App (app)
+
+Everything is attached to app.
+
+Examples:
+
+app.get()
+app.post()
+app.use()
+app.listen()
+
+---
+
+Request Flow:
+
+Browser
+↓
+Express App
+↓
+Middleware
+↓
+Route
+↓
+Response
+
+==================================================
+**2. MIDDLEWARE**
+=================
+
+Definition:
+
+> Functions that execute before the response is sent.
+
+Syntax:
+
+(req,res,next)
+
+Example:
+
+app.use((req,res,next)=>{
+console.log("Middleware");
+next();
+});
+
+---
+
+next()
+
+Meaning:
+
+> Continue to the next middleware or route.
+
+Without next():
+
+Request
+↓
+Middleware
+↓
+❌ Request hangs forever.
+
+---
+
+Logger Middleware:
+
+app.use((req,res,next)=>{
+console.log(req.method);
+console.log(req.path);
+next();
+});
+
+Purpose:
+
+> Log every incoming request.
+
+==================================================
+**3. VIEW ENGINE (EJS)**
+========================
+
+app.set("view engine","ejs");
+
+Purpose:
+
+> Tell Express to use EJS.
+
+---
+
+app.set(
+"views",
+path.join(__dirname,"views")
+);
+
+Purpose:
+
+> Tell Express where EJS files are.
+
+==================================================
+**4. STATIC FILES**
+===================
+
+app.use(
+express.static(
+path.join(__dirname,"public")
+)
+);
+
+Purpose:
+
+> Serve CSS, images, and JS files.
+
+Folder:
+
+public/
+├── css
+├── js
+└── images
+
+==================================================
+**5. BODY PARSER**
+==================
+
+app.use(
+express.urlencoded({
+extended:true
+})
+);
+
+Purpose:
+
+> Convert Form Data into req.body.
+
+Without:
+
+# req.body
+
+undefined
+
+==================================================
+**6. METHOD OVERRIDE**
+======================
+
+HTML Forms support:
+
+GET
+POST
+
+But REST APIs need:
+
+PUT
+DELETE
+
+---
+
+app.use(
+methodOverride("_method")
+);
+
+Example:
+
+POST
+/listings/123?_method=PUT
+
+becomes:
+
+PUT
+/listings/123
+
+==================================================
+**7. MONGOOSE**
+===============
+
+Purpose:
+
+> Connect Node.js to MongoDB.
+
+Connection:
+
+await mongoose.connect(MongoURI);
+
+MongoURI:
+
+mongodb://localhost:27017/Just_A_DB
+
+Meaning:
+
+localhost
+→ your computer
+
+27017
+→ MongoDB port
+
+Just_A_DB
+→ database name
+
+==================================================
+**8. MONGOOSE MODEL**
+=====================
+
+Example:
+
+const Listing =
+mongoose.model(
+"Listing",
+listingSchema
+);
+
+Purpose:
+
+> Interface between Node.js and MongoDB collection.
+
+==================================================
+**9. CRUD OPERATIONS**
+======================
+
+CREATE
+
+new Listing(data)
+await listing.save();
+
+---
+
+READ ALL
+
+await Listing.find({});
+
+---
+
+READ ONE
+
+await Listing.findById(id);
+
+---
+
+UPDATE
+
+await Listing.findByIdAndUpdate(
+id,
+data
+);
+
+---
+
+DELETE
+
+await Listing.findByIdAndDelete(id);
+
+==================================================
+**10. ROUTES**
+==============
+
+GET
+→ Fetch data
+
+POST
+→ Create data
+
+PUT
+→ Update data
+
+DELETE
+→ Delete data
+
+---
+
+Examples:
+
+GET /listings
+
+GET /listings/:id
+
+POST /listings
+
+PUT /listings/:id
+
+DELETE /listings/:id
+
+==================================================
+**11. EXPRESS ROUTER**
+======================
+
+Problem:
+
+app.js becomes huge.
+
+Solution:
+
+Express Router.
+
+Example:
+
+const router =
+express.Router();
+
+---
+
+Folder Structure:
+
+routes/
+│
+├── listing.js
+├── review.js
+└── user.js
+
+---
+
+Import:
+
+const listings =
+require("./routes/listing");
+
+Use:
+
+app.use(
+"/listings",
+listings
+);
+
+Export:
+
+module.exports = router;
+
+==================================================
+**12. MERGEPARAMS**
+===================
+
+Example:
+
+const router =
+express.Router({
+mergeParams:true
+});
+
+Purpose:
+
+> Access parent route parameters.
+
+---
+
+Parent Route:
+
+/listings/:id/reviews
+
+Without:
+
+# req.params.id
+
+undefined
+
+With:
+
+# req.params.id
+
+listing id
+
+==================================================
+**13. JOI VALIDATION**
+======================
+
+Purpose:
+
+> Validate user input before saving.
+
+Example:
+
+listingSchema.validate(req.body);
+
+reviewSchema.validate(req.body);
+
+---
+
+Flow:
+
+Form
+↓
+Joi Validation
+↓
+Valid?
+↙       ↘
+Yes      No
+↓        ↓
+Save    Throw Error
+
+==================================================
+**14. CUSTOM ERRORS**
+=====================
+
+Normal Error:
+
+throw new Error(
+"Something went wrong"
+);
+
+Contains:
+
+{
+message
+}
+
+---
+
+Custom Error:
+
+throw new ExpressError(
+"Page Not Found",
+404
+);
+
+Contains:
+
+{
+message,
+statusCode
+}
+
+==================================================
+**15. ERROR HANDLING**
+======================
+
+throw
+
+Meaning:
+
+> Create/Raise an error.
+
+---
+
+next(err)
+
+Meaning:
+
+> Send error to Express.
+
+Flow:
+
+Error
+↓
+next(err)
+↓
+Error Middleware
+
+==================================================
+**16. ERROR MIDDLEWARE**
+========================
+
+Syntax:
+
+app.use(
+(err,req,res,next)=>{
+}
+);
+
+Must have:
+
+(err,req,res,next)
+
+4 parameters.
+
+---
+
+Purpose:
+
+> Central place for handling all errors.
+
+Example:
+
+app.use((err,req,res,next)=>{
+let {
+message,
+statusCode=500
+} = err;
+
+res
+.status(statusCode)
+.render(
+"error.ejs",
+{message}
+);
+});
+
+==================================================
+**17. WRAPASYNC**
+=================
+
+Problem:
+
+Async routes can reject Promises.
+
+---
+
+Traditional:
+
+try{
+...
+}
+catch(err){
+next(err);
+}
+
+---
+
+WrapAsync:
+
+WrapAsync(
+async(req,res)=>{
+...
+}
+);
+
+Purpose:
+
+> Automatically catches async errors.
+
+Mental Model:
+
+# WrapAsync
+
+Automatic try/catch
+
+==================================================
+**18. 404 HANDLER**
+===================
+
+Purpose:
+
+> Catch unmatched routes.
+
+Example:
+
+/pokemon
+/random
+/abc
+
+---
+
+app.use((req,res,next)=>{
+next(
+new ExpressError(
+"Page Not Found",
+404
+)
+);
+});
+
+Must be LAST.
+
+==================================================
+**19. RELATIONSHIPS**
+=====================
+
+One Listing
+↓
+Many Reviews
+
+Schema:
+
+reviews:[
+{
+type:
+Schema.Types.ObjectId,
+ref:"Review"
+}
+]
+
+Meaning:
+
+Listing stores Review IDs.
+
+==================================================
+**20. POPULATE()**
+==================
+
+Without:
+
+reviews:[
+ObjectId(...)
+]
+
+With:
+
+.populate("reviews")
+
+Result:
+
+reviews:[
+{
+comment:"Nice",
+rating:5
+}
+]
+
+Purpose:
+
+> Replace IDs with documents.
+
+==================================================
+**21. $pull**
+=============
+
+Purpose:
+
+> Remove item from array.
+
+Example:
+
+await Listing.findByIdAndUpdate(
+id,
+{
+$pull:{
+reviews:reviewId
+}
+}
+);
+
+==================================================
+**22. COMMON ERRORS**
+=====================
+
+CastError
+
+>
+
+Invalid MongoDB ObjectId.
+
+---
+
+ValidationError
+
+>
+
+Required field missing.
+
+---
+
+E11000 Duplicate Key Error
+
+>
+
+Unique field already exists.
+
+==================================================
+**23. COMPLETE APPLICATION FLOW**
+=================================
+
+Browser
+↓
+Express App
+↓
+Middleware
+↓
+Router
+↓
+Controller Logic
+↓
+MongoDB
+↓
+Response
+↓
+Browser
+
+==================================================
+**THINGS TO REMEMBER FOREVER**
+==============================
+
+next()
+
+>
+
+Continue.
+
+next(err)
+
+>
+
+Send error to Express.
+
+throw
+
+>
+
+Create error.
+
+WrapAsync
+
+>
+
+Automatic try/catch.
+
+populate()
+
+>
+
+Replace IDs with documents.
+
+$pull
+
+>
+
+Remove from array.
+
+save()
+
+>
+
+Create document.
+
+find()
+
+>
+
+Read many documents.
+
+findById()
+
+>
+
+Read one document.
+
+findByIdAndUpdate()
+
+>
+
+Update document.
+
+findByIdAndDelete()
+
+>
+
+Delete document.
+
+Joi
+
+>
+
+Validation.
+
+Middleware
+
+>
+
+Runs before route finishes.
+
+Router
+
+>
+
+Organize routes.
+
+mergeParams
+
+>
+
+Access parent route parameters.

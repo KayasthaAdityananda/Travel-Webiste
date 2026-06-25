@@ -2,22 +2,8 @@ const express = require("express");
 const Listing = require('../models/listing.js');
 const WrapAsync = require('../utils/Wrapasync.js');
 const ExpressError = require('../utils/ExpressError.js');
-const { listingSchema } = require("../Schema.js");
 const router = express.Router();
-
-// Validation for scheme (middleware) - moved to Mongoose Schema
-
-const validateListing = (req, res, next) => {
-        // Validation of schema (Using Joi) 
-        
-        let { error } = listingSchema.validate(req.body);
-        if(error) {
-            let errorMessage = error.details.map((el) => el.message).join(", ");
-            throw new ExpressError(errorMessage, 400);
-        } else {
-            next();
-        }
-};
+const { Isloggedin, isOwner, validateListing } = require("../middleware.js")
 
 //Index Route
 router.get("/", WrapAsync(async (req, res) => {
@@ -27,66 +13,63 @@ router.get("/", WrapAsync(async (req, res) => {
 
 //New Route
 //kept above 
-router.get('/new', (req, res) => {
-    res.render('listings/new.ejs'); 
+router.get('/new', Isloggedin, (req, res) => {
+    res.render('listings/new.ejs');
 });
 
 //Show Route 
 router.get('/:id', WrapAsync(async (req, res) => {
     let { id } = req.params;
-    const listing = await Listing.findById(id).populate("reviews");
+    const listing = await Listing.findById(id)
+        .populate({
+            path: "reviews",
+            populate: {
+                path: "author",
+            },
+        })
+        .populate("owner");
+
+    if (!listing) {
+        req.flash("error", "Does not exist");
+        return res.redirect("/listings");
+    }
+
     res.render('listings/show.ejs', { listing });
 }));
 
 //Create Route
-router.post("/", validateListing, WrapAsync(async (req, res, next) =>
+router.post("/", Isloggedin, validateListing, WrapAsync(async (req, res, next) =>
     {
-        // Validations - Moved to Mongoose Schema
-        // if(!req.body.listing) {
-        //     throw new ExpressError("Invalid Listing Data!", 400);
-        // }
-
         const newListing = new Listing(req.body.listing);
-
-        // // Validations - Moved to Mongoose Schema
-        // if(!newListing.title ) {
-        //     throw new ExpressError("Please fill in the title!", 400);
-        // }
-        // if(!newListing.description ) {
-        //     throw new ExpressError("Please fill in the description!", 400);
-        // }
-        // if(!newListing.price ) {
-        //     throw new ExpressError("Please fill in the price!", 400);
-        // }
-        // if(!newListing.location ) {
-        //     throw new ExpressError("Please fill in the location!", 400);
-        // }
-        // if(!newListing.country ) {
-        //     throw new ExpressError("Please fill in the country!", 400);
-        // }
-
+        newListing.owner = req.user._id;
         await newListing.save();
+        req.flash("success", "New Listing added!");
         res.redirect("/listings");
     }));
 
 //Edit Route
-router.get("/:id/edit", WrapAsync(async(req,res) => {
+router.get("/:id/edit", Isloggedin, isOwner, WrapAsync(async(req,res) => {
     let { id } = req.params;
     const listing = await Listing.findById(id);
+    if (!listing) {
+        req.flash("error", "Does not exist");
+        return res.redirect("/listings");
+    }
     res.render("listings/edit.ejs", { listing });
 }));
 
 //Update Route 
-router.put("/:id", validateListing, WrapAsync(async (req, res) => {
+router.put("/:id", isOwner, validateListing, WrapAsync(async (req, res) => {
     let { id } = req.params; 
     await Listing.findByIdAndUpdate(id, {...req.body.listing});
     res.redirect("/listings");
 }));
 
 //Delete
-router.get("/:id", WrapAsync(async (req, res) =>{
+router.delete("/:id", Isloggedin, isOwner, WrapAsync(async (req, res) =>{
     let { id } = req.params;
     await Listing.findByIdAndDelete(id);
+    req.flash("deleted", "Deleted a listing");
     res.redirect("/listings");
 }));
 

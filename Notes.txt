@@ -768,3 +768,55 @@ mergeParams
 >
 
 Access parent route parameters.
+
+
+==================================================
+COOKIES
+=========================
+
+Web cookies
+
+Http cookies are small blocks of data created by a web server while a user is browsing a website and placed on the user's computer or other device by the user's web browser.
+
+for personalization, tracking
+
+to Send_
+app.get("/setcookiess", (req,res) =>{
+    res.cookie("greet", "namaste");
+    res.cookie("origin", "India");
+    res.send("We sent you a cookie");
+})
+
+// __State__
+>Stateful Protocol   
+require server to save the status and session information
+eg - ftp
+ex-Upi
+
+>Stateless Protocol
+does not 
+eg - Http
+ex-Cash
+
+// __Express Sessions__
+back and forth client - server requests
+
+>An attempt to make out sessions Stateful
+>To save some related data without login in 
+
+>For example an user adds items to cart without login in,
+    so we assign a session id where we add the user's data 
+
+>bcoz cookies have limits to store information
+  
+resave: forces the session to be saved back to the session store, even if the session was never modified
+saveuninitialized: forces a session that is "ininijhitjhi" to be saved to the store
+
+// __connect-flash__
+The flash is a special area of the session used for storing messages.
+Messages are written to the flash and cleared after being displayed to the user.
+
+
+res.locals.messages = req.flash("success");
+
+

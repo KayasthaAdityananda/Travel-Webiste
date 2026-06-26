@@ -3,7 +3,6 @@ const router = express.Router({mergeParams: true});
 
 const WrapAsync = require('../utils/Wrapasync.js');
 const ExpressError = require('../utils/ExpressError.js');
-
 const Listing = require('../models/listing.js');
 const Review = require("../models/Review.js");
 const reviewController = require("../controllers/review.js");

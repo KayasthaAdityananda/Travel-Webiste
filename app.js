@@ -78,12 +78,12 @@ app.use((req, res, next) =>{
 // })
 
 
-// Logger - MiddleWare
-app.use((req, res, next) =>{
-    req.responseTime = new Date(Date.now()).toString();
-    console.log(req.method, req.path, req.responseTime, req.hostname);
-    next();
-})
+// // Logger - MiddleWare
+// app.use((req, res, next) =>{
+//     req.responseTime = new Date(Date.now()).toString();
+//     console.log(req.method, req.path, req.responseTime, req.hostname);
+//     next();
+// })
 
 
 app.get(
